@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -37,26 +39,35 @@ public class BedOutput {
      * @throws IOException 如果在写入文件过程中发生I/O错误。
      */
     public void writeBEDFile(String outputPath, String[][] data) throws IOException {
-        // 使用BufferedWriter提高文件写入性能，并通过FileWriter指定写入的文件
-        // 使用 BufferedWriter 提高文件写入性能
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath))) {
-            // 遍历headers数组，写入文件的列标题行
-            // 写入列头
-            for (int i = 0; i < headers.length; i++) {
-                writer.write(headers[i]);
-                // 除最后一列外，每列之后添加制表符作为分隔符
-                if (i < headers.length - 1) {
-                    writer.write("\t");
-                }
+        boolean hasHeader = false;
+        
+        // 检查文件是否存在及是否有标题
+        try (BufferedReader reader = new BufferedReader(new FileReader(outputPath))) {
+            String firstLine = reader.readLine();
+            if (firstLine != null && firstLine.trim().equals(String.join("\t", headers))) {
+                hasHeader = true;
             }
-            writer.newLine(); // 写入一行空行作为标题行和数据行的分隔
+        } catch (IOException e) {
+            // 文件不存在或者读取失败，忽略
+        }
 
-            // 遍历data数组，写入每一行的数据
+        // 使用 BufferedWriter 提高文件写入性能，并指定为追加模式
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath, true))) {
+            // 如果没有标题，写入列头
+            if (!hasHeader) {
+                for (int i = 0; i < headers.length; i++) {
+                    writer.write(headers[i]);
+                    if (i < headers.length - 1) {
+                        writer.write("\t");
+                    }
+                }
+                writer.newLine(); // 写入一行空行作为标题行和数据行的分隔
+            }
+
             // 写入数据行
             for (String[] row : data) {
                 for (int i = 0; i < row.length; i++) {
                     writer.write(row[i]);
-                    // 除最后一列外，每列之后添加制表符作为分隔符
                     if (i < row.length - 1) {
                         writer.write("\t");
                     }

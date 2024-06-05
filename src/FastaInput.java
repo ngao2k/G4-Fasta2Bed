@@ -1,10 +1,11 @@
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.zip.*;
 
 /**
  * FastaInput类用于读取和处理FASTA格式的文件。
- * 该类将FASTA文件按染色体分割成不同的二进制文件并缓存到指定位置。
+ * 该类将FASTA文件按染色体分割成不同的压缩二进制文件并缓存到指定位置。
  */
 public class FastaInput {
     private final Map<String, Path> chromosomeFiles;
@@ -25,7 +26,7 @@ public class FastaInput {
     }
 
     /**
-     * 将FASTA文件按染色体分割成不同的二进制文件并缓存到指定位置。
+     * 将FASTA文件按染色体分割成不同的压缩二进制文件并缓存到指定位置。
      *
      * @param filePath 文件路径
      */
@@ -40,7 +41,7 @@ public class FastaInput {
                     if (header != null) {
                         writeChromosomeFile(header, sequenceStream.toByteArray());
                     }
-                    header = line.substring(1).split("\\s+")[0].trim();
+                    header = line.substring(1).split("\\s+")[0].trim().replaceAll("[:,.&*%$#@!]", "_");
                     sequenceStream = new ByteArrayOutputStream();
                 } else {
                     sequenceStream.write(line.trim().getBytes());
@@ -55,15 +56,18 @@ public class FastaInput {
     }
 
     /**
-     * 将序列写入对应的染色体文件。
+     * 将序列写入对应的压缩染色体文件。
      *
      * @param header          染色体的标题
      * @param sequenceContent 序列内容的字节数组
      */
     private void writeChromosomeFile(String header, byte[] sequenceContent) {
         try {
-            Path filePath = cacheDir.resolve(header + ".bin");
-            Files.write(filePath, sequenceContent);
+            Path filePath = cacheDir.resolve(header + ".bin.gz");
+            try (FileOutputStream fos = new FileOutputStream(filePath.toFile());
+                 GZIPOutputStream gos = new GZIPOutputStream(fos)) {
+                gos.write(sequenceContent);
+            }
             chromosomeFiles.put(header, filePath);
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,8 +86,16 @@ public class FastaInput {
         if (filePath == null) {
             return "Sequence not found for header: " + header;
         }
-        try {
-            return Files.readString(filePath);
+        try (FileInputStream fis = new FileInputStream(filePath.toFile());
+             GZIPInputStream gis = new GZIPInputStream(fis);
+             InputStreamReader isr = new InputStreamReader(gis);
+             BufferedReader br = new BufferedReader(isr)) {
+            StringBuilder sequence = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sequence.append(line);
+            }
+            return sequence.toString();
         } catch (IOException e) {
             e.printStackTrace();
             return "Error reading sequence for header: " + header;

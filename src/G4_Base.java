@@ -1,6 +1,8 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * G4_Base类用于识别和匹配DNA序列中的G-四链体结构。
@@ -12,36 +14,57 @@ public class G4_Base {
     public String input;
 
     // 定义各种G-四链体结构的正则表达式
-    // 正则表达式
     private String re_L7 = ".{1,7}?";
-    private String re_CG3 = "[CG]{3,}";
-    private String re_bulgeCG = "[CG][CG][^CG][CG][CG]?|[CG][CG]?[^CG][CG][CG]";
-    private String re_bulge1CG = "(" + re_bulgeCG + ")(" + re_L7 + re_CG3 + "){3,}";
-    private String re_bulge2CG = "(" + re_CG3 + re_L7 + ")(" + re_bulgeCG + ")(" + re_L7 + re_CG3 + "){2,}";
-    private String re_bulge3CG = "(" + re_CG3 + re_L7 + "){2}(" + re_bulgeCG + ")(" + re_L7 + re_CG3 + "){1,}";
-    private String re_bulge4CG = "(" + re_CG3 + re_L7 + "){3}(" + re_bulgeCG + ")";
-    private String re_gvbq1CG = "[CG][CG](" + re_L7 + re_CG3 + "){3,}";
-    private String re_gvbq2CG = "(" + re_CG3 + re_L7 + ")[CG][CG](" + re_L7 + re_CG3 + "){2,}";
-    private String re_gvbq3CG = "(" + re_CG3 + re_L7 + "){2}[CG][CG](" + re_L7 + re_CG3 + "){1,}";
-    private String re_gvbq4CG = "(" + re_CG3 + re_L7 + "){3}[CG][CG]";
-    private String re_4GL15CG = re_CG3 + ".{1,15}?" + re_CG3;
-    private String re_4GL151CG = "(" + re_4GL15CG + ")(" + re_L7 + re_CG3 + "){2,}";
-    private String re_4GL152CG = "(" + re_CG3 + re_L7 + ")(" + re_4GL15CG + ")(" + re_L7 + re_CG3 + "){1,}";
-    private String re_4GL153CG = "(" + re_CG3 + re_L7 + "){2}(" + re_4GL15CG + ")";
-    
+    private String re_G3 = "G{3,}";
+    private String re_C3 = "C{3,}";
+
+    // G
+    private String re_bulgeG = "G{2}[^G]G{2}?|G{2}?[^G]G{2}";
+    private String re_bulge1G = "(" + re_bulgeG + ")(" + re_L7 + re_G3 + "){3,}";
+    private String re_bulge2G = "(" + re_G3 + re_L7 + ")(" + re_bulgeG + ")(" + re_L7 + re_G3 + "){2,}";
+    private String re_bulge3G = "(" + re_G3 + re_L7 + "){2}(" + re_bulgeG + ")(" + re_L7 + re_G3 + "){1,}";
+    private String re_bulge4G = "(" + re_G3 + re_L7 + "){3}(" + re_bulgeG + ")";
+    private String re_gvbq1G = "G{2}(" + re_L7 + re_G3 + "){3,}";
+    private String re_gvbq2G = "(" + re_G3 + re_L7 + ")G{2}(" + re_L7 + re_G3 + "){2,}";
+    private String re_gvbq3G = "(" + re_G3 + re_L7 + "){2}G{2}(" + re_L7 + re_G3 + "){1,}";
+    private String re_gvbq4G = "(" + re_G3 + re_L7 + "){3}G{2}";
+    private String re_4GL15G = re_G3 + ".{1,15}?" + re_G3;
+    private String re_4GL151G = "(" + re_4GL15G + ")(" + re_L7 + re_G3 + "){2,}";
+    private String re_4GL152G = "(" + re_G3 + re_L7 + ")(" + re_4GL15G + ")(" + re_L7 + re_G3 + "){1,}";
+    private String re_4GL153G = "(" + re_G3 + re_L7 + "){2}(" + re_4GL15G + ")";
+    // C
+    private String re_bulgeC = "C{2}[^C]C{2}?|C{2}?[^C]C{2}";
+    private String re_bulge1C = "(" + re_bulgeC + ")(" + re_L7 + re_C3 + "){3,}";
+    private String re_bulge2C = "(" + re_C3 + re_L7 + ")(" + re_bulgeC + ")(" + re_L7 + re_C3 + "){2,}";
+    private String re_bulge3C = "(" + re_C3 + re_L7 + "){2}(" + re_bulgeC + ")(" + re_L7 + re_C3 + "){1,}";
+    private String re_bulge4C = "(" + re_C3 + re_L7 + "){3}(" + re_bulgeC + ")";
+    private String re_gvbq1C = "C{2}(" + re_L7 + re_C3 + "){3,}";
+    private String re_gvbq2C = "(" + re_C3 + re_L7 + ")C{2}(" + re_L7 + re_C3 + "){2,}";
+    private String re_gvbq3C = "(" + re_C3 + re_L7 + "){2}C{2}(" + re_L7 + re_C3 + "){1,}";
+    private String re_gvbq4C = "(" + re_C3 + re_L7 + "){3}C{2}";
+    private String re_4GL15C = re_C3 + ".{1,15}?" + re_C3;
+    private String re_4GL151C = "(" + re_4GL15C + ")(" + re_L7 + re_C3 + "){2,}";
+    private String re_4GL152C = "(" + re_C3 + re_L7 + ")(" + re_4GL15C + ")(" + re_L7 + re_C3 + "){1,}";
+    private String re_4GL153C = "(" + re_C3 + re_L7 + "){2}(" + re_4GL15C + ")";
+
     // 各种G-四链体结构模式的组合正则表达式
-    private String re_4G = re_CG3 + "(" + re_L7 + re_CG3 + "){3,}";
-    private String re_Bulge = re_bulge1CG + "|" + re_bulge2CG + "|" + re_bulge3CG + "|" + re_bulge4CG;
-    private String re_GVBQ = re_gvbq1CG + "|" + re_gvbq2CG + "|" + re_gvbq3CG + "|" + re_gvbq4CG;
-    private String re_4GL15 = re_4GL151CG + "|" + re_4GL152CG + "|" + re_4GL153CG;
-    private String re_PHQS = re_CG3 + "(" + re_L7 + re_CG3 + "){1,2}";
+    private String re_4G = re_G3 + "(" + re_L7 + re_G3 + "){3,}" + "|" 
+                         + re_C3 + "(" + re_L7 + re_C3 + "){3,}";
+    private String re_Bulge = re_bulge1G + "|" + re_bulge2G + "|" + re_bulge3G + "|" + re_bulge4G + "|"
+                            + re_bulge1C + "|" + re_bulge2C + "|" + re_bulge3C + "|" + re_bulge4C;
+    private String re_GVBQ = re_gvbq1G + "|" + re_gvbq2G + "|" + re_gvbq3G + "|" + re_gvbq4G + "|"
+                           + re_gvbq1C + "|" + re_gvbq2C + "|" + re_gvbq3C + "|" + re_gvbq4C;
+    private String re_4GL15 = re_4GL151G + "|" + re_4GL152G + "|" + re_4GL153G + "|"
+                            + re_4GL151C + "|" + re_4GL152C + "|" + re_4GL153C;
+    private String re_PHQS = re_G3 + "(" + re_L7 + re_G3 + "){1,2}" + "|" 
+                           + re_C3 + "(" + re_L7 + re_C3 + "){1,2}";
 
     // 对应各种G-四链体结构模式的正则表达式对象
-    private Pattern pattern_4G = Pattern.compile(re_4G);
-    private Pattern pattern_Bulge = Pattern.compile(re_Bulge);
-    private Pattern pattern_GVBQ = Pattern.compile(re_GVBQ);
-    private Pattern pattern_4GL15 = Pattern.compile(re_4GL15);
-    private Pattern pattern_PHQS = Pattern.compile(re_PHQS);
+    private Pattern pattern_4G = Pattern.compile(re_4G, Pattern.CASE_INSENSITIVE);
+    private Pattern pattern_Bulge = Pattern.compile(re_Bulge, Pattern.CASE_INSENSITIVE);
+    private Pattern pattern_GVBQ = Pattern.compile(re_GVBQ, Pattern.CASE_INSENSITIVE);
+    private Pattern pattern_4GL15 = Pattern.compile(re_4GL15, Pattern.CASE_INSENSITIVE);
+    private Pattern pattern_PHQS = Pattern.compile(re_PHQS, Pattern.CASE_INSENSITIVE);
 
     /**
      * 设置输入的DNA序列。
@@ -62,43 +85,63 @@ public class G4_Base {
         // 存储所有匹配结果的列表
         ArrayList<String[]> matches = new ArrayList<>();
 
-        // 对输入序列使用不同的模式进行匹配
-        Matcher matcher_4G = pattern_4G.matcher(sequence);
-        Matcher matcher_Bulge = pattern_Bulge.matcher(sequence);
-        Matcher matcher_GVBQ = pattern_GVBQ.matcher(sequence);
-        Matcher matcher_4GL15 = pattern_4GL15.matcher(sequence);
-        Matcher matcher_PHQS = pattern_PHQS.matcher(sequence);
+        // 使用并行流来处理每个匹配器的结果
+        List<Matcher> matchers = List.of(
+                pattern_4G.matcher(sequence),
+                pattern_Bulge.matcher(sequence),
+                pattern_GVBQ.matcher(sequence),
+                pattern_4GL15.matcher(sequence),
+                pattern_PHQS.matcher(sequence));
 
-        // 遍历每个匹配器的结果，并将匹配结果添加到列表中
-        while (matcher_4G.find()) {
-            // 构建匹配结果的字符串数组，并添加到列表中
-            // 构建一个字符串数组，包含匹配的起始位置、结束位置、匹配的字符串和模式类型
-            String[] match = { String.valueOf(matcher_4G.start()), String.valueOf(matcher_4G.end()),
-                    matcher_4G.group(), "4G" };
-            matches.add(match);
-        }
-        while (matcher_Bulge.find()) {
-            String[] match = { String.valueOf(matcher_Bulge.start()), String.valueOf(matcher_Bulge.end()),
-                    matcher_Bulge.group(), "Bulge" };
-            matches.add(match);
-        }
-        while (matcher_GVBQ.find()) {
-            String[] match = { String.valueOf(matcher_GVBQ.start()), String.valueOf(matcher_GVBQ.end()),
-                    matcher_GVBQ.group(), "GVBQ" };
-            matches.add(match);
-        }
-        while (matcher_4GL15.find()) {
-            String[] match = { String.valueOf(matcher_4GL15.start()), String.valueOf(matcher_4GL15.end()),
-                    matcher_4GL15.group(), "4GL15" };
-            matches.add(match);
-        }
-        while (matcher_PHQS.find()) {
-            String[] match = { String.valueOf(matcher_PHQS.start()), String.valueOf(matcher_PHQS.end()),
-                    matcher_PHQS.group(), "PHQS" };
-            matches.add(match);
-        }
+        matches.addAll(matchers.parallelStream()
+                .flatMap(matcher -> {
+                    List<String[]> localMatches = new ArrayList<>();
+                    while (matcher.find()) {
+                        String[] match = {
+                                String.valueOf(matcher.start()),
+                                String.valueOf(matcher.end()),
+                                matcher.group(),
+                                getPatternType(matcher)
+                        };
+                        localMatches.add(match);
+                    }
+                    return localMatches.stream();
+                })
+                .collect(Collectors.toList()));
 
         // 返回包含所有匹配结果的列表
         return matches;
+    }
+
+    /**
+     * 获取匹配器对应的模式类型。
+     *
+     * @param matcher 正在匹配的Matcher对象。
+     * @return 匹配的模式类型字符串。
+     */
+    private String getPatternType(Matcher matcher) {
+        if (matcher.pattern().pattern().equals(pattern_4G.pattern())) {
+            return "4G";
+        } else if (matcher.pattern().pattern().equals(pattern_Bulge.pattern())) {
+            return "Bulge";
+        } else if (matcher.pattern().pattern().equals(pattern_GVBQ.pattern())) {
+            return "GVBQ";
+        } else if (matcher.pattern().pattern().equals(pattern_4GL15.pattern())) {
+            return "4GL15";
+        } else if (matcher.pattern().pattern().equals(pattern_PHQS.pattern())) {
+            return "PHQS";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public static void main(String[] args) {
+        G4_Base matcher = new G4_Base();
+        String sequence = "你的DNA序列"; // 替换为实际序列
+        ArrayList<String[]> results = matcher.matchPatterns(sequence);
+
+        // 打印匹配结果
+        results.forEach(result -> System.out.println("Start: " + result[0] + ", End: " + result[1] +
+                ", Match: " + result[2] + ", Type: " + result[3]));
     }
 }

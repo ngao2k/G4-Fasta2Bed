@@ -63,9 +63,10 @@ public class G4Fasta2Bed {
                 ;
                 // 对染色体序列进行处理，寻找G4结构
                 processSequence_F(header, sequence, "+");
+
+                // 将找到的G4结构写入BED文件
+                bedOutput.writeBEDFile(outputPath_F.toString(), bedData);
             }
-            // 将找到的G4结构写入BED文件
-            bedOutput.writeBEDFile(outputPath_F.toString(), bedData);
         } catch (IOException e) {
             // 打印堆栈跟踪，如果读取文件时发生错误
             e.printStackTrace();
@@ -98,9 +99,10 @@ public class G4Fasta2Bed {
 
                 // 对转换后的负链序列进行G4结构的处理和分析
                 processSequence_F(header, convertedSequence, "-");
+
+                // 将分析得到的G4结构数据写入到指定的BED文件中
+                bedOutput.writeBEDFile(outputPath_R.toString(), bedData);
             }
-            // 将分析得到的G4结构数据写入到指定的BED文件中
-            bedOutput.writeBEDFile(outputPath_R.toString(), bedData);
         } catch (IOException e) {
             // 打印IO异常的堆栈跟踪信息
             e.printStackTrace();
@@ -122,6 +124,7 @@ public class G4Fasta2Bed {
 
         // 进行G4匹配
         ArrayList<String[]> matches = g4Base.matchPatterns(sequence);
+
         // 初始化bedData数组，大小为匹配结果的数量
         bedData = new String[matches.size()][8];
         // 遍历匹配结果
@@ -202,6 +205,25 @@ public class G4Fasta2Bed {
     }
 
     /**
+     * 清理缓存目录。
+     * 
+     * 本方法尝试清除指定的缓存目录中的所有文件。如果清除操作失败，将打印错误堆栈跟踪。
+     * 使用DirectoryCleaner类的clearDirectory方法来执行实际的清除操作。
+     * 
+     * 注意：此方法不接受任何参数，也不返回任何值。
+     */
+    private void clearCache() {
+        try {
+            // 尝试清除缓存目录。cacheFolder之前应该已经被初始化为缓存目录的路径。
+            DirectoryCleaner.clearDirectory(cacheFolder.toString());
+        } catch (IOException e) {
+            // 捕获并处理清除缓存时可能发生的IO异常。
+            e.printStackTrace();
+            System.out.println("Error clearing cache directory.");
+        }
+    }
+
+    /**
      * 程序入口。
      * 从Fasta文件中读取DNA序列并转换为Bed格式，标注G4结构的功能。
      * 
@@ -232,12 +254,15 @@ public class G4Fasta2Bed {
             switch (args[3]) {
                 case "-all":
                     g4Fasta2Bed.matchG4_All();
+                    g4Fasta2Bed.clearCache();
                     break;
                 case "-f":
                     g4Fasta2Bed.matchG4_F();
+                    g4Fasta2Bed.clearCache();
                     break;
                 case "-r":
                     g4Fasta2Bed.matchG4_R();
+                    g4Fasta2Bed.clearCache();
                     break;
                 default:
                     System.out.println("Invalid option / 非法选项: " + args[3]);
