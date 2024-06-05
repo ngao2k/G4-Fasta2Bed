@@ -15,6 +15,8 @@
     - 此类提供了G4序列分析的基本功能。
 - G4Fasta2Bed.java
     - 此类集成了其他类的功能，用于在FASTA文件中匹配G4序列并将结果写入BED文件。
+- DirectoryCleaner.java
+    - 此类用于清理缓存文件夹。
 
 ## 使用方法
 - 获取`jar`文件

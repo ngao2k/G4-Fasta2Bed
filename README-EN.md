@@ -15,6 +15,8 @@ This project includes several Java classes for motif matching, sequence analysis
     - This class provides the basic functionalities for G4 sequence analysis.
 - G4Fasta2Bed.java
     - This class integrates the functionalities of other classes to match G4 sequences in FASTA files and write the results to BED files.
+- DirectoryCleaner.java
+    - This class is used to clean up the cache folder.
 
 ## Usage
 - Obtain the `jar` file
