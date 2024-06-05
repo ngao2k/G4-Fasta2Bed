@@ -36,16 +36,6 @@ java -jar G4-Fasta2Bed.jar <input_fasta_file> <cache_folder> <output_folder> [Pa
 ```
 java -jar G4-Fasta2Bed.jar input.fasta cacheFolder outputFolder -aP
 ```
->[!NOTE]
->To further maximize computer performance and obtain results as quickly as possible, the program defaults to using parallel processing. However, this may lead to `Out Of Memory` issues. If this error occurs, there are two possible solutions:
-> - Try using the `-aS` parameter to process in serial mode.
-> - Add the `-Xmx` parameter to adjust the JVM heap memory size.
->   - For example, `-Xmx8G` means using 8GB of heap memory.</br>
-        ```
-        java -Xmx8G -jar G4-Fasta2Bed.jar <input_fasta_file> <cache_folder> <output_Folder> [Parameters]
-        ```
->   - Ensure that your computer has this much memory capacity.
->   - Set it to at least half of your computer's memory capacity.
 
 > [!IMPORTANT]
 >    - If you want to run multiple instances simultaneously, ensure that each instance has a different cache folder.

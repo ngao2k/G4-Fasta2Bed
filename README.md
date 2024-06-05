@@ -36,16 +36,6 @@ java -jar G4-Fasta2Bed.jar <input_fasta_file> <cache_folder>  <output_Folder> [P
 ```
 java -jar G4-Fasta2Bed.jar input.fasta cacheFolder outputFolder -aP
 ```
->[!NOTE]
->为了进一步榨干电脑性能并以最快速度得到结果，程序默认使用并行的方法进行处理，但这可能会导致 `Out Of Memory` 问题的出现。因此，如果出现此错误，有以下两种解决方法：
-> - 请尝试使用 `-aS` 参数，使用串行方法进行处理。
-> - 添加 `-Xmx` 参数，调整 JVM 的堆内存大小。
->   - 例如，`-Xmx8G` 表示使用8GB的堆内存。</br>
-        ```
-        java -Xmx8G -jar G4-Fasta2Bed.jar <input_fasta_file> <cache_folder>  <output_Folder>
-        ```
->   - 请务必确保您的计算机拥有这么多的内存容量。
->   - 请至少设置为您计算机的内存容量的一半。
 
 > [!IMPORTANT]
 >    - 如果您希望同时运行多个实例，请确保每个实例的缓存文件夹都不相同。
