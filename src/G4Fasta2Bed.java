@@ -89,14 +89,16 @@ public class G4Fasta2Bed {
      * G4结构是一种特殊的DNA结构，由四个G碱基通过氢键相互作用形成。
      * 本方法首先从FASTA文件中读取每个染色体的DNA序列，然后将这些序列转换为对应的负链序列，
      * 接着对转换后的序列进行G4结构的处理和分析，最后将分析结果写入到指定的BED文件中。
+     * @throws IOException 
      */
-    private void matchG4_R() {
+    private void matchG4_R() throws IOException {
+        ConvertSequence convert = new ConvertSequence();
         for (int i = 0; i < headers.size(); i++) {
             String header = headers.get(i);
             String sequence = sequences.get(i);
 
             // 将正链DNA序列转换为负链序列
-            String convertedSequence = convertSequence(sequence);
+            String convertedSequence = convert.convertSequence(sequence);
 
             // 对转换后的负链序列进行G4结构的处理和分析
             processSequence(header, convertedSequence, "-");
@@ -150,52 +152,7 @@ public class G4Fasta2Bed {
         }
     }
 
-    /**
-     * 将DNA序列转换为其互补序列。
-     * DNA互补配对规则是：A与T配对，C与G配对。此函数同时处理大写和小写字母。
-     *
-     * @param sequence 输入的DNA序列，可以包含大写和小写字母。
-     * @return 返回转换后的互补序列。
-     */
-    private String convertSequence(String sequence) {
-        // 使用StringBuilder来构建结果序列，因为它比String拼接效率更高。
-        StringBuilder converted = new StringBuilder();
-        // 遍历输入序列的每个字符。
-        for (char base : sequence.toCharArray()) {
-            // 根据DNA互补配对规则进行转换。
-            switch (base) {
-                case 'A':
-                    converted.append('T');
-                    break;
-                case 'C':
-                    converted.append('G');
-                    break;
-                case 'T':
-                    converted.append('A');
-                    break;
-                case 'G':
-                    converted.append('C');
-                    break;
-                case 'a':
-                    converted.append('t');
-                    break;
-                case 'c':
-                    converted.append('g');
-                    break;
-                case 't':
-                    converted.append('a');
-                    break;
-                case 'g':
-                    converted.append('c');
-                    break;
-                default:
-                    // 如果遇到非DNA字符，则直接将其添加到结果中。
-                    converted.append(base);
-            }
-        }
-        // 返回构建好的互补序列。
-        return converted.toString();
-    }
+   
 
     /**
      * 匹配正链和负链的G4结构。
@@ -208,7 +165,12 @@ public class G4Fasta2Bed {
         Thread threadR = new Thread(new Runnable() {
             @Override
             public void run() {
-                matchG4_R();
+                try {
+                    matchG4_R();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -232,7 +194,7 @@ public class G4Fasta2Bed {
         }
     }
 
-    public void matchG4_All_Serial() {
+    public void matchG4_All_Serial() throws IOException {
         matchG4_F();
         matchG4_R();
     }

@@ -1,2 +1,5 @@
 # 不上传jar文件
 *.jar
+
+# 不上传vscode配置文件
+.vscode
